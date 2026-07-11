@@ -9,5 +9,5 @@ const SVGS = {
 };
 
 export function emblemSvg(name) {
-  return SVGS[name] || SVGS.comet;
+  return Object.hasOwn(SVGS, name) ? SVGS[name] : SVGS.comet;
 }
