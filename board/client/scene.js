@@ -49,6 +49,7 @@ export function createScene(container, { onLiftoff, onPreloadError } = {}) {
   const ships = new Map(); // callsign -> { group, data, index, pos, lastZone, launch }
   let templates = null;      // id -> template Object3D, once preloaded
   let pendingList = null;    // roster that arrived before templates were ready
+  let disposed = false;      // guards the in-flight preload promise against a torn-down scene
   let angle = 0;
   let elapsedMs = 0;
   const clock = new THREE.Clock();
@@ -192,9 +193,11 @@ export function createScene(container, { onLiftoff, onPreloadError } = {}) {
   renderer.domElement.addEventListener('click', onClick);
 
   preloadShipTemplates().then((t) => {
+    if (disposed) return;
     templates = t;
     if (pendingList) { const l = pendingList; pendingList = null; update(l); }
   }).catch((err) => {
+    if (disposed) return;
     console.error('ship model preload failed', err);
     onPreloadError?.(err);
   });
@@ -202,6 +205,7 @@ export function createScene(container, { onLiftoff, onPreloadError } = {}) {
   return {
     update,
     dispose() {
+      disposed = true;
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
       renderer.domElement.removeEventListener('click', onClick);
