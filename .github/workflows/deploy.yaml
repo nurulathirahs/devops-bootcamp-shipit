@@ -1,7 +1,7 @@
 name: deploy
 on: [push,workflow_dispatch]
 jobs:
-  say-hello:
+  test:
     runs-on: ubuntu-latest
     defaults:
       run:
